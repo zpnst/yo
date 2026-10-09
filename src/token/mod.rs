@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub(crate) enum Token {
+pub enum Token {
     ILLEGAL,
     EOF,
 

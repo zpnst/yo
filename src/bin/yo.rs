@@ -1,8 +1,7 @@
 use std::fs;
 use std::io;
 
-mod token;
-mod lexer;
+use yo::lexer;
 
 fn main() {
     let input = read_file("expls/Main.yo");
