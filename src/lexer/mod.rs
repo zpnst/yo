@@ -4,20 +4,16 @@ use crate::token::Token;
 pub struct Lexer {
     plain_input: String,
     current_position: usize,
-    next_position: usize,
     current_character: u8,
 }
 
 impl Lexer {
     pub fn new(input: String) -> Self {
-        let mut l = Self { 
-            plain_input: input, 
+       Self { 
+            plain_input: input.clone(), 
             current_position: usize::default(), 
-            next_position: usize::default(), 
-            current_character: u8::default() 
-        };
-        l.read_character();
-        l 
+            current_character: input.as_bytes()[0]
+        }
     }
 
     pub fn tokinize(&mut self) -> Vec<Token> {
@@ -68,13 +64,12 @@ impl Lexer {
     }
 
     fn read_character(&mut self) {
-        if self.next_position >= self.plain_input.len() {
+        if self.current_position+1 >= self.plain_input.len() {
             self.current_character = 0;
         } else {
-            self.current_character = self.plain_input.as_bytes()[self.next_position];
+            self.current_character = self.plain_input.as_bytes()[self.current_position+1];
         }
-        self.current_position = self.next_position;
-        self.next_position += 1;
+        self.current_position += 1;
     }
 
     fn read_identifier(&mut self) -> Token {
