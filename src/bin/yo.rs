@@ -4,7 +4,7 @@ use std::io;
 use yo::lexer;
 
 fn main() {
-    let input = read_file("expls/Main.yo");
+    let input = read_file("expls/Debug.yo");
     let mut lex = lexer::Lexer::new(input.clone());
     let toks = lex.tokinize();
     println!("{:?}", toks);

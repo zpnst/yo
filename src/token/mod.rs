@@ -7,18 +7,32 @@ pub enum Token {
     INTEGER(String),
 
     // Basic
-    ASSIGN,
-    PLUS,
+    ASSIGN,    // =
+    PLUS,      // +
+    MINUS,     // -
+    EXCL,      // !
+    STAR,      // *
+    SLASH,     // /
 
-    COMMA,
-    SEMICOLON,
+    COMMA,     // ,
+    SEMICOLON, // ;
 
-    LPAREN,
-    RPAREN,
-    LBRACE,
-    RBRACE,
+    LPAREN,    // (
+    RPAREN,    // )
+    LBRACE,    // {
+    RBRACE,    // }
+
+    LT,       // <
+    GT,       // >
+    EQ,       // ==
+    NEQ,      // !=
 
     // Keywords
-    DEFINE,
-    YO
+    DEFINE,  // define
+    YO,      // yo
+    TRUE,    // true
+    FALSE,   // false
+    IF,      // if
+    ELSE,    // else 
+    RET      // ret
 }

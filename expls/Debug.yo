@@ -1,1 +1,7 @@
-yo b = 10;
+
+yo x = 10;
+yo y = 11;
+
+if x == y {
+    yo pred = x != 42;
+};

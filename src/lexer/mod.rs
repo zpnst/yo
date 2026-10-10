@@ -1,37 +1,39 @@
+pub mod keywords;
+
 use crate::token::Token;
 
 #[derive(Debug)]
 pub struct Lexer {
     plain_input: String,
-    current_position: usize,
-    current_character: u8,
+    curr_position: usize,
+    curr_symbol: u8,
 }
 
 impl Lexer {
     pub fn new(input: String) -> Self {
        Self { 
             plain_input: input.clone(), 
-            current_position: usize::default(), 
-            current_character: input.as_bytes()[0]
+            curr_position: usize::default(), 
+            curr_symbol: input.as_bytes()[0]
         }
     }
 
     pub fn tokinize(&mut self) -> Vec<Token> {
-        if self.plain_input.as_bytes()[self.plain_input.len()-1] != b'\n' {
+        if self.plain_at(self.plain_input.len()-1) != b'\n' {
             self.plain_input.push('\n');
         }
         let mut res = Vec::new();
-        while self.current_character != 0 {
+        while self.curr_symbol != 0 {
             res.push(self.next_token());
         }
         res
     }
 
     fn next_token(&mut self) -> Token {
-        self.skip_whitespaces_and_control_characters();
+        self.skip_whitespaces_and_control_symbols();
 
-        let res: Token = match self.current_character {
-            b'=' => Token::ASSIGN,
+        let res: Token = match self.curr_symbol {
+            0    => Token::EOF,
             b'+' => Token::PLUS,
             b',' => Token::COMMA,
             b';' => Token::SEMICOLON,
@@ -39,7 +41,27 @@ impl Lexer {
             b')' => Token::RPAREN,
             b'{' => Token::LBRACE,
             b'}' => Token::RBRACE,
-            0    => Token::EOF,
+            b'-' => Token::MINUS,
+            b'*' => Token::STAR,
+            b'/' => Token::SLASH,
+            b'<' => Token::LT,
+            b'>' => Token::GT,
+            b'!' => {
+                if self.next_symbol() == b'=' {
+                    self.read_symbol();
+                    Token::NEQ 
+                } else {
+                    Token::EXCL
+                }
+            },
+            b'=' => {
+                if self.next_symbol() == b'=' {
+                    self.read_symbol();
+                    Token::EQ 
+                } else {
+                    Token::ASSIGN
+                }
+            },
             some => {
                 if is_letter(some) {
                     return self.read_identifier();
@@ -50,54 +72,58 @@ impl Lexer {
                 }
             }
         };
-        self.read_character();
+        self.read_symbol();
         res
     }
 
-    fn skip_whitespaces_and_control_characters(&mut self) {
+    fn skip_whitespaces_and_control_symbols(&mut self) {
         while
-            self.current_character == b' '  || self.current_character == b'\n'  || 
-            self.current_character == b'\t'  || self.current_character == b'\r'
+            self.curr_symbol == b' '  || self.curr_symbol == b'\n'  || 
+            self.curr_symbol == b'\t'  || self.curr_symbol == b'\r'
         {
-            self.read_character();
+            self.read_symbol();
         }
     }
 
-    fn read_character(&mut self) {
-        if self.current_position+1 >= self.plain_input.len() {
-            self.current_character = 0;
+    fn read_symbol(&mut self) {
+        if self.curr_position+1 >= self.plain_input.len() {
+            self.curr_symbol = 0;
         } else {
-            self.current_character = self.plain_input.as_bytes()[self.current_position+1];
+            self.curr_symbol = self.plain_at(self.curr_position+1);
         }
-        self.current_position += 1;
+        self.curr_position += 1;
+    }
+
+    fn next_symbol(&mut self) -> u8 {
+        if self.curr_position+1 >= self.plain_input.len() {
+            return 0;
+        } else {
+            return self.plain_at(self.curr_position+1)
+        }
     }
 
     fn read_identifier(&mut self) -> Token {
-        let start_current_position = self.current_position;
-        while is_letter(self.current_character) {
-            self.read_character();
+        let start_curr_position = self.curr_position;
+        while is_letter(self.curr_symbol) {
+            self.read_symbol();
         }
-        keyword_filter(self.plain_input[start_current_position..self.current_position].to_string())
+        keywords::filter(self.plain_input[start_curr_position..self.curr_position].to_string())
     }
 
     fn read_integer(&mut self) -> Token {
-        let start_current_position = self.current_position;
-        while is_integer(self.current_character) {
-            self.read_character();
+        let start_curr_position = self.curr_position;
+        while is_integer(self.curr_symbol) {
+            self.read_symbol();
         }
         Token::INTEGER(
-            self.plain_input[start_current_position..self.current_position].to_string()
+            self.plain_input[start_curr_position..self.curr_position].to_string()
         )
     }
 
-}
-
-fn keyword_filter(ik: String) -> Token {
-    match ik.as_str() {
-        "define" => Token::DEFINE,
-        "yo"     => Token::YO,
-        _        => Token::IDENT(ik)
+    fn plain_at(&self, at: usize) -> u8 {
+        self.plain_input.as_bytes()[at]
     }
+
 }
 
 fn is_letter(il: u8) -> bool {
