@@ -1,10 +1,11 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     ILLEGAL,
     EOF,
 
     IDENT(String),
     INTEGER(String),
+    STRING(String),
 
     // Basic
     ASSIGN,    // =
@@ -26,6 +27,7 @@ pub enum Token {
     GT,       // >
     EQ,       // ==
     NEQ,      // !=
+    QUOTE,    // "
 
     // Keywords
     DEFINE,  // define

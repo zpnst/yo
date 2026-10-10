@@ -3,13 +3,13 @@ pub mod keywords;
 use crate::token::Token;
 
 #[derive(Debug)]
-pub struct Lexer {
+pub struct Tokinizer {
     plain_input: String,
     curr_position: usize,
     curr_symbol: u8,
 }
 
-impl Lexer {
+impl Tokinizer {
     pub fn new(input: String) -> Self {
        Self { 
             plain_input: input.clone(), 
@@ -46,6 +46,7 @@ impl Lexer {
             b'/' => Token::SLASH,
             b'<' => Token::LT,
             b'>' => Token::GT,
+            b'"' => self.read_string(),
             b'!' => {
                 if self.next_symbol() == b'=' {
                     self.read_symbol();
@@ -102,6 +103,17 @@ impl Lexer {
         }
     }
 
+    fn read_string(&mut self) -> Token {
+        self.read_symbol();
+        let start_curr_position = self.curr_position;
+        while is_string_symbol(self.curr_symbol) {
+            self.read_symbol();
+        }
+        Token::STRING(
+            self.plain_input[start_curr_position..self.curr_position].to_string()
+        )
+    }
+
     fn read_identifier(&mut self) -> Token {
         let start_curr_position = self.curr_position;
         while is_letter(self.curr_symbol) {
@@ -134,4 +146,11 @@ fn is_letter(il: u8) -> bool {
 
 fn is_integer(ii: u8) -> bool {
     ii >= b'0' && ii <= b'9'
+}
+
+fn is_string_symbol(iss: u8) -> bool {
+    if iss == 34 {
+        return false;
+    }
+    iss >= 32 && iss <=126
 }

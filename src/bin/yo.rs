@@ -1,19 +1,31 @@
-use std::fs;
 use std::io;
+use std::io::Write;
 
-use yo::lexer;
+use yo::tokinizer;
 
-fn main() {
-    let input = read_file("expls/Debug.yo");
-    let mut lex = lexer::Lexer::new(input.clone());
-    let toks = lex.tokinize();
-    println!("{:?}", toks);
-}
+const REPL: &'static str = ">";
+const REPL_ERROR_PREFIX: &'static str = "yo :: [repl] :: ";
 
-fn read_file(path: &str) -> String {
-    let r_input: io::Result<String> = fs::read_to_string(path);
-    match r_input {
-        Ok(i) => i,
-        Err(err) => panic!("{:?}", err)
+fn main() -> io::Result<()> {
+    'repl: loop {
+        print!("{} ", REPL);
+        io::stdout()
+            .flush()
+            .expect(&format!("{}stdout flushing error", REPL_ERROR_PREFIX).to_string());
+
+        let mut input: String = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect(&format!("{}input reading error", REPL_ERROR_PREFIX).to_string());
+        
+        match input.as_str().trim() {
+            "quit" => break 'repl,
+            _ => {
+                let mut lex = tokinizer::Tokinizer::new(input.clone());
+                let toks = lex.tokinize();
+                println!("{:?}", toks);
+            }
+        }
     }
+    Ok(())
 }

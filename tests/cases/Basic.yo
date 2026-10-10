@@ -1,0 +1,8 @@
+yo x = 1;
+yo y = 41;
+
+yo add = define(x, y) {
+    x + y;
+};
+
+yo res = add(x, y);
